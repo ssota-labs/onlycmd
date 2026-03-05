@@ -8,3 +8,6 @@ dist
 !.env.example
 coverage
 *.tsbuildinfo
+
+# Internal launch docs (not for public repo)
+docs/hacker-news-launch.md
