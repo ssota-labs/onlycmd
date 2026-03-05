@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const INSTALL_CMD = "npm install onlycmd @ssota-labs/onlycmd-plugin";
+const INSTALL_CMD = "npm install onlycmd onlycmd-plugin";
 
 export default function Home() {
   return (
@@ -79,7 +79,7 @@ export default function Home() {
               </p>
               <pre className="overflow-x-auto rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm font-mono text-zinc-800">
                 <code>{`import { createRuntime } from "onlycmd";
-import { github } from "@ssota-labs/onlycmd-plugin";
+import { github } from "onlycmd-plugin";
 
 const runtime = createRuntime();
 runtime.use(github({ token: process.env.GITHUB_TOKEN }));`}</code>
@@ -316,7 +316,7 @@ Available skills:
 import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createRuntime } from "onlycmd";
-import { github } from "@ssota-labs/onlycmd-plugin";
+import { github } from "onlycmd-plugin";
 
 export async function POST(req: Request) {
   const { messages } = await req.json();

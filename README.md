@@ -60,12 +60,12 @@ Requires: shell, gh binary            Requires: nothing (just Node.js)
 ## Quick Start
 
 ```bash
-npm install onlycmd @ssota-labs/onlycmd-plugin
+npm install onlycmd onlycmd-plugin
 ```
 
 ```typescript
 import { createRuntime } from "onlycmd";
-import { github } from "@ssota-labs/onlycmd-plugin";
+import { github } from "onlycmd-plugin";
 
 const runtime = createRuntime();
 runtime.use(github({ token: process.env.GITHUB_TOKEN }));
@@ -89,7 +89,7 @@ That's it. One tool for the agent, one line to wire up GitHub.
 ### Developer CLI
 
 ```bash
-npx onlycmd add github     # install @ssota-labs/onlycmd-plugin + scaffold .use(github())
+npx onlycmd add github     # install onlycmd-plugin + scaffold .use(github())
 npx onlycmd add jira       # add another plugin
 npx onlycmd list           # show available plugins
 ```
@@ -98,7 +98,7 @@ npx onlycmd list           # show available plugins
 
 ```typescript
 import { createRuntime } from "onlycmd";
-import { github, jira, linear } from "@ssota-labs/onlycmd-plugin";
+import { github, jira, linear } from "onlycmd-plugin";
 
 const runtime = createRuntime();
 runtime.use(github({ token: process.env.GITHUB_TOKEN }));
@@ -173,7 +173,7 @@ Compare this to MCP's tens of thousands of tokens **always** present in context,
 
 ```typescript
 import { createRuntime } from "onlycmd";
-import { github } from "@ssota-labs/onlycmd-plugin";
+import { github } from "onlycmd-plugin";
 
 const runtime = createRuntime();
 runtime.use(github({ token: process.env.GITHUB_TOKEN }));
@@ -229,7 +229,7 @@ A complete stateless `route.ts` — runtime is created fresh per request, no per
 import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { createRuntime } from "onlycmd";
-import { github, linear } from "@ssota-labs/onlycmd-plugin";
+import { github, linear } from "onlycmd-plugin";
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -465,16 +465,16 @@ interface VirtualCLIModule {
 }
 ```
 
-### Official plugins (`@ssota-labs/onlycmd-plugin`)
+### Official plugins (`onlycmd-plugin`)
 
 All official plugins live in a single package. Import what you need:
 
 ```typescript
 // Import from the main entry
-import { github, jira, linear } from "@ssota-labs/onlycmd-plugin";
+import { github, jira, linear } from "onlycmd-plugin";
 
 // Or use subpath exports for tree-shaking
-import { github } from "@ssota-labs/onlycmd-plugin/github";
+import { github } from "onlycmd-plugin/github";
 ```
 
 Community plugins can be published as separate packages following the same `defineModule()` pattern.
@@ -484,7 +484,7 @@ Community plugins can be published as separate packages following the same `defi
 | Package                          | npm                                                                                            | Description                                      |
 | -------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | onlycmd                      | [onlycmd](https://www.npmjs.com/package/onlycmd)                                       | Core runtime + developer CLI (`npx onlycmd`) |
-| `@ssota-labs/onlycmd-plugin` | [@ssota-labs/onlycmd-plugin](https://www.npmjs.com/package/@ssota-labs/onlycmd-plugin) | Official plugins (GitHub, Jira, Linear, ...)     |
+| `onlycmd-plugin` | [onlycmd-plugin](https://www.npmjs.com/package/onlycmd-plugin) | Official plugins (GitHub, Jira, Linear, ...)     |
 
 Install with `npm install onlycmd`; import from `onlycmd`.
 

@@ -22,7 +22,7 @@ if (!cmd || cmd === "--help" || cmd === "-h") {
 }
 
 if (cmd === "init") {
-  console.log("Run: npm install onlycmd @ssota-labs/onlycmd-plugin");
+  console.log("Run: npm install onlycmd onlycmd-plugin");
   console.log("Then: createRuntime() and runtime.use(github({ token }))");
   process.exit(0);
 }
@@ -33,14 +33,14 @@ if (cmd === "add") {
     console.error("Usage: onlycmd add <plugin>");
     process.exit(1);
   }
-  console.log(`To add ${plugin}: npm install onlycmd @ssota-labs/onlycmd-plugin`);
+  console.log(`To add ${plugin}: npm install onlycmd onlycmd-plugin`);
   console.log(`Then: runtime.use(${plugin}({ ... }))`);
   process.exit(0);
 }
 
 if (cmd === "list") {
   console.log("Available plugins: github, jira (stub), linear (stub)");
-  console.log("Install: npm install onlycmd @ssota-labs/onlycmd-plugin");
+  console.log("Install: npm install onlycmd onlycmd-plugin");
   process.exit(0);
 }
 

@@ -155,7 +155,7 @@ jobs:
           ### 📝 How to Install
           \`\`\`bash
           npm install onlycmd@${{ steps.version.outputs.canary_version }}
-          npm install @ssota-labs/onlycmd-plugin@${{ steps.version.outputs.canary_version }}
+          npm install onlycmd-plugin@${{ steps.version.outputs.canary_version }}
           \`\`\`
 
           ### 📝 How to Test
@@ -209,4 +209,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Published to npm:" >> $GITHUB_STEP_SUMMARY
           echo "- \`onlycmd@${{ steps.version.outputs.canary_version }}\` (canary tag)" >> $GITHUB_STEP_SUMMARY
-          echo "- \`@ssota-labs/onlycmd-plugin@${{ steps.version.outputs.canary_version }}\` (canary tag)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`onlycmd-plugin@${{ steps.version.outputs.canary_version }}\` (canary tag)" >> $GITHUB_STEP_SUMMARY
