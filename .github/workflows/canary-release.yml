@@ -116,12 +116,12 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.canary_version }}"
 
-          cd packages/vcli
+          cd packages/core
           npm version "$VERSION" --no-git-tag-version
           npm publish --tag canary --access public
 
-          cd ../vcli-plugin
-          npm pkg set dependencies.vcli="$VERSION"
+          cd ../plugin
+          npm pkg set dependencies.onlycmd="$VERSION"
           npm version "$VERSION" --no-git-tag-version
           npm publish --tag canary --access public
 
@@ -154,8 +154,8 @@ jobs:
 
           ### 📝 How to Install
           \`\`\`bash
-          npm install vcli@${{ steps.version.outputs.canary_version }}
-          npm install @ssota-labs/vcli-plugin@${{ steps.version.outputs.canary_version }}
+          npm install onlycmd@${{ steps.version.outputs.canary_version }}
+          npm install @ssota-labs/onlycmd-plugin@${{ steps.version.outputs.canary_version }}
           \`\`\`
 
           ### 📝 How to Test
@@ -208,5 +208,5 @@ jobs:
           echo "- \`v${{ steps.version.outputs.canary_version }}\`" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Published to npm:" >> $GITHUB_STEP_SUMMARY
-          echo "- \`vcli@${{ steps.version.outputs.canary_version }}\` (canary tag)" >> $GITHUB_STEP_SUMMARY
-          echo "- \`@ssota-labs/vcli-plugin@${{ steps.version.outputs.canary_version }}\` (canary tag)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`onlycmd@${{ steps.version.outputs.canary_version }}\` (canary tag)" >> $GITHUB_STEP_SUMMARY
+          echo "- \`@ssota-labs/onlycmd-plugin@${{ steps.version.outputs.canary_version }}\` (canary tag)" >> $GITHUB_STEP_SUMMARY

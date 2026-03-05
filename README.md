@@ -1,4 +1,4 @@
-# vcli
+# onlycmd
 
 **The CLI + Skill pattern behind Claude Code and OpenClaw — now in any JavaScript runtime.**
 
@@ -16,10 +16,10 @@ This pattern is remarkably token-efficient. Where MCP injects dozens of tool sch
 
 The catch: **that pattern only pays off where a real shell exists.** As Claude Code and OpenClaw proved the power of the CLI pattern, existing CLIs like `gh` or `x-cli` gained new relevance as agent interfaces, and developers began writing new CLIs as lightweight alternatives to MCP rather than building full MCP servers. But all of this only works when the agent has a shell. In serverless, edge, browser, or sandboxed Node.js environments, none of those CLIs can run, and you're back to MCP's heavy schemas or rolling your own tools.
 
-**`vcli` changes that.** It brings the CLI + skill pattern to every JavaScript runtime — serverless, edge, browser, embedded. No shell, no subprocesses. Just in-process function dispatch that looks exactly like a CLI to the agent. The agent doesn't know the difference; it still writes `gh issue list --repo owner/repo`. But underneath, there's no binary, no process, no OS. Just a function call.
+**onlycmd changes that.** It brings the CLI + skill pattern to every JavaScript runtime — serverless, edge, browser, embedded. No shell, no subprocesses. Just in-process function dispatch that looks exactly like a CLI to the agent. The agent doesn't know the difference; it still writes `gh issue list --repo owner/repo`. But underneath, there's no binary, no process, no OS. Just a function call.
 
 ```
-Real shell                            vcli
+Real shell                            onlycmd
 ─────────────────────────────         ─────────────────────────────
 execute("gh issue list ...")          run("gh issue list ...")
        ↓                                    ↓
@@ -32,7 +32,7 @@ Requires: shell, gh binary            Requires: nothing (just Node.js)
 
 ## Why not MCP?
 
-|                      | MCP                                        | vcli                                          |
+|                      | MCP                                        | onlycmd                                   |
 | -------------------- | ------------------------------------------ | --------------------------------------------- |
 | **Context cost**     | Tens of thousands of tokens (GitHub alone) | ~50 tokens (1 tool) + ~500 (skill, on demand) |
 | **Adding a service** | Build & deploy MCP server                  | Only js function                              |
@@ -40,7 +40,7 @@ Requires: shell, gh binary            Requires: nothing (just Node.js)
 | **LLM familiarity**  | Custom schemas (new to model)              | CLI patterns (already in training data)       |
 | **Reusability**      | Community MCP servers                      | Pre-built plugins, shared via npm             |
 
-## Where vcli fits
+## Where onlycmd fits
 
 ```
                     Real CLI          Virtual (in-process)
@@ -48,24 +48,24 @@ Requires: shell, gh binary            Requires: nothing (just Node.js)
   Per-function  │              │  MCP         │
   schemas       │  (N/A)       │              │
                 ├──────────────┼──────────────┤
-  Single tool   │  OpenClaw    │  vcli ← here │
+  Single tool   │  OpenClaw    │  onlycmd ← here │
   + skills      │  (exec+SKILL)│              │
                 └──────────────┴──────────────┘
 ```
 
 - **MCP**: virtual execution + per-function schemas → token-heavy, always in context
 - **OpenClaw / Claude Code**: real CLI + single tool + skills → token-efficient, but requires a shell and installed binaries
-- **vcli**: virtual execution + single tool + skills → token-efficient, runs anywhere JavaScript runs, model-agnostic, pre-built plugins via npm
+- **onlycmd**: virtual execution + single tool + skills → token-efficient, runs anywhere JavaScript runs, model-agnostic, pre-built plugins via npm
 
 ## Quick Start
 
 ```bash
-npm install vcli @ssota-labs/vcli-plugin
+npm install onlycmd @ssota-labs/onlycmd-plugin
 ```
 
 ```typescript
-import { createRuntime } from "vcli";
-import { github } from "@ssota-labs/vcli-plugin";
+import { createRuntime } from "onlycmd";
+import { github } from "@ssota-labs/onlycmd-plugin";
 
 const runtime = createRuntime();
 runtime.use(github({ token: process.env.GITHUB_TOKEN }));
@@ -89,16 +89,16 @@ That's it. One tool for the agent, one line to wire up GitHub.
 ### Developer CLI
 
 ```bash
-npx vcli add github     # install @ssota-labs/vcli-plugin + scaffold .use(github())
-npx vcli add jira       # add another plugin
-npx vcli list           # show available plugins
+npx onlycmd add github     # install @ssota-labs/onlycmd-plugin + scaffold .use(github())
+npx onlycmd add jira       # add another plugin
+npx onlycmd list           # show available plugins
 ```
 
 ### Multiple plugins
 
 ```typescript
-import { createRuntime } from "vcli";
-import { github, jira, linear } from "@ssota-labs/vcli-plugin";
+import { createRuntime } from "onlycmd";
+import { github, jira, linear } from "@ssota-labs/onlycmd-plugin";
 
 const runtime = createRuntime();
 runtime.use(github({ token: process.env.GITHUB_TOKEN }));
@@ -115,7 +115,7 @@ await runtime.run("linear issue list --team ENG");
 
 ## Agent Integration (Progressive Disclosure)
 
-vcli implements the same progressive disclosure pattern as Claude Code / OpenClaw's SKILL.md system — but without file I/O, so it works in stateless serverless environments.
+onlycmd implements the same progressive disclosure pattern as Claude Code / OpenClaw's SKILL.md system — but without file I/O, so it works in stateless serverless environments.
 
 ### How it works
 
@@ -132,14 +132,15 @@ You can choose how skill summaries are serialized for the system prompt:
 
 ```typescript
 // JSON (default) — good for structured prompts
-runtime.listSkills();                    // array of { name, description }
-runtime.listSkills({ format: "json" });  // same, stringified for embedding
+runtime.listSkills(); // array of { name, description }
+runtime.listSkills({ format: "json" }); // same, stringified for embedding
 
 // XML — good for XML/Claude-style prompts
 runtime.listSkills({ format: "xml" });
 ```
 
 **JSON output (default):**
+
 ```json
 [
   { "name": "github", "description": "GitHub operations — issues, PRs, repos" },
@@ -148,6 +149,7 @@ runtime.listSkills({ format: "xml" });
 ```
 
 **XML output (`format: "xml"`):**
+
 ```xml
 <available_skills>
   <skill name="github" description="GitHub operations — issues, PRs, repos" />
@@ -159,7 +161,7 @@ Use whichever fits your system prompt. For example, if the rest of your instruct
 
 ```
 System prompt: skill summaries from listSkills()    ← always (~100 tokens)
-Agent decides it needs GitHub                        
+Agent decides it needs GitHub
   → calls read_skill("github")                      ← on demand (~500 tokens)
   → reads full SKILL.md content
   → calls run("gh issue list --repo owner/repo")
@@ -170,8 +172,8 @@ Compare this to MCP's tens of thousands of tokens **always** present in context,
 ### Generic example
 
 ```typescript
-import { createRuntime } from "vcli";
-import { github } from "@ssota-labs/vcli-plugin";
+import { createRuntime } from "onlycmd";
+import { github } from "@ssota-labs/onlycmd-plugin";
 
 const runtime = createRuntime();
 runtime.use(github({ token: process.env.GITHUB_TOKEN }));
@@ -191,7 +193,8 @@ const tools = [
   },
   {
     name: "read_skill",
-    description: "Read the full documentation for a skill (call before using an unfamiliar skill)",
+    description:
+      "Read the full documentation for a skill (call before using an unfamiliar skill)",
     parameters: {
       type: "object",
       properties: {
@@ -201,7 +204,8 @@ const tools = [
     },
     execute: (params) => {
       const content = runtime.getFullSkill(params.name);
-      if (!content) return { ok: false, error: `Skill "${params.name}" not found` };
+      if (!content)
+        return { ok: false, error: `Skill "${params.name}" not found` };
       return { ok: true, content };
     },
   },
@@ -224,8 +228,8 @@ A complete stateless `route.ts` — runtime is created fresh per request, no per
 // app/api/agent/route.ts
 import { streamText } from "ai";
 import { openai } from "@ai-sdk/openai";
-import { createRuntime } from "vcli";
-import { github, linear } from "@ssota-labs/vcli-plugin";
+import { createRuntime } from "onlycmd";
+import { github, linear } from "@ssota-labs/onlycmd-plugin";
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -245,7 +249,10 @@ export async function POST(req: Request) {
     read_skill: {
       description: "Read full documentation for a skill",
       parameters: {
-        name: { type: "string", description: "Skill name (github, linear, etc.)" },
+        name: {
+          type: "string",
+          description: "Skill name (github, linear, etc.)",
+        },
       },
       execute: async ({ name }: { name: string }) => {
         const content = runtime.getFullSkill(name);
@@ -272,6 +279,7 @@ To use a skill: first call read_skill to learn the commands, then call run.
 ```
 
 **Token budget in this setup:**
+
 - Always in context: `run` tool + `read_skill` tool + skill summaries (~100-200 tokens)
 - On demand: `read_skill("github")` loads full markdown (~500 tokens, once per conversation)
 - Stateless: runtime is created per request — no shared memory, no file I/O, works on Vercel/Cloudflare/Lambda
@@ -310,14 +318,14 @@ Handlers resolve auth in order: config token (from `.use()`) → context token (
 
 ## Client-side tool rendering (Vercel AI SDK, etc.)
 
-The agent only has one tool — `run`. On the client you still want to render different components per command (e.g. an issue list for `gh issue list`, a PR card for `gh pr view`). vcli stays client-agnostic: it does not know about React or the AI SDK. It only adds **response metadata** so the client can branch.
+The agent only has one tool — `run`. On the client you still want to render different components per command (e.g. an issue list for `gh issue list`, a PR card for `gh pr view`). onlycmd stays client-agnostic: it does not know about React or the AI SDK. It only adds **response metadata** so the client can branch.
 
 Every `runtime.run()` result includes:
 
 - **`module`** — which plugin handled the command (e.g. `"gh"`, `"jira"`)
 - **`command`** — the subcommand path (e.g. `"issue list"`, `"pr view"`)
 
-Use these to choose which component to render. The dispatcher already knows this when it invokes the handler; vcli just surfaces it in the JSON.
+Use these to choose which component to render. The dispatcher already knows this when it invokes the handler; onlycmd just surfaces it in the JSON.
 
 ### Example: conditional rendering by `module` + `command`
 
@@ -343,7 +351,7 @@ Use these to choose which component to render. The dispatcher already knows this
 }
 ```
 
-You can centralize this in a small mapper (e.g. `getComponentForRunResult(module, command, result)`) or a separate UI package; vcli does not depend on any of that.
+You can centralize this in a small mapper (e.g. `getComponentForRunResult(module, command, result)`) or a separate UI package; onlycmd does not depend on any of that.
 
 ## How It Works
 
@@ -388,10 +396,10 @@ await runtime.run("gh issue list --help");
 
 ## Writing Plugins
 
-Plugins are created with `defineModule()` from `vcli`. The return value is a factory function that receives config and produces a module.
+Plugins are created with `defineModule()` from onlycmd. The return value is a factory function that receives config and produces a module.
 
 ```typescript
-import { defineModule } from "vcli";
+import { defineModule } from "onlycmd";
 
 export const myService = defineModule({
   name: "mysvc",
@@ -420,7 +428,7 @@ export const myService = defineModule({
     skill: {
       summary: "Manage users, teams, and permissions for MyService",
       full: [
-        "# MyService Virtual CLI",
+        "# MyService OnlyCMD",
         "",
         "## Users",
         "mysvc users list [--team <team>] [--limit N]",
@@ -433,8 +441,8 @@ export const myService = defineModule({
 Then users consume it:
 
 ```typescript
-import { createRuntime } from "vcli";
-import { myService } from "my-vcli-plugin";
+import { createRuntime } from "onlycmd";
+import { myService } from "my-onlycmd-plugin";
 
 const runtime = createRuntime();
 runtime.use(myService({ apiKey: "..." }));
@@ -447,38 +455,38 @@ A resolved module satisfies:
 
 ```typescript
 interface VirtualCLIModule {
-  name: string;           // CLI namespace prefix (e.g., "gh", "jira")
-  description: string;    // One-line for skill listing
-  commands: CommandTree;   // Nested subcommand tree with handlers
+  name: string; // CLI namespace prefix (e.g., "gh", "jira")
+  description: string; // One-line for skill listing
+  commands: CommandTree; // Nested subcommand tree with handlers
   skill?: {
-    summary: string;      // Short description for listSkills() (always in context)
-    full: string;         // Full SKILL.md content for getFullSkill() (on demand)
+    summary: string; // Short description for listSkills() (always in context)
+    full: string; // Full SKILL.md content for getFullSkill() (on demand)
   };
 }
 ```
 
-### Official plugins (`@ssota-labs/vcli-plugin`)
+### Official plugins (`@ssota-labs/onlycmd-plugin`)
 
 All official plugins live in a single package. Import what you need:
 
 ```typescript
 // Import from the main entry
-import { github, jira, linear } from "@ssota-labs/vcli-plugin";
+import { github, jira, linear } from "@ssota-labs/onlycmd-plugin";
 
 // Or use subpath exports for tree-shaking
-import { github } from "@ssota-labs/vcli-plugin/github";
+import { github } from "@ssota-labs/onlycmd-plugin/github";
 ```
 
 Community plugins can be published as separate packages following the same `defineModule()` pattern.
 
 ## Packages
 
-| Package                   | npm                                                                                | Description                                  |
-| ------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------- |
-| `vcli`                    | [`vcli`](https://www.npmjs.com/package/vcli)                                       | Core runtime + developer CLI (`npx vcli`)    |
-| `@ssota-labs/vcli-plugin` | [`@ssota-labs/vcli-plugin`](https://www.npmjs.com/package/@ssota-labs/vcli-plugin) | Official plugins (GitHub, Jira, Linear, ...) |
+| Package                          | npm                                                                                            | Description                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| onlycmd                      | [onlycmd](https://www.npmjs.com/package/onlycmd)                                       | Core runtime + developer CLI (`npx onlycmd`) |
+| `@ssota-labs/onlycmd-plugin` | [@ssota-labs/onlycmd-plugin](https://www.npmjs.com/package/@ssota-labs/onlycmd-plugin) | Official plugins (GitHub, Jira, Linear, ...)     |
 
-Core is published as an unscoped package — `import from "vcli"`, install with `npm install vcli`.
+Install with `npm install onlycmd`; import from `onlycmd`.
 
 ## Roadmap
 
@@ -487,9 +495,9 @@ Core is published as an unscoped package — `import from "vcli"`, install with 
 - [ ] Jira plugin
 - [ ] Linear plugin
 - [ ] Notion plugin
-- [ ] Python runtime (`pip install vcli`)
-- [ ] Skill auto-discovery (scan installed packages for vcli modules)
-- [ ] `npx vcli` developer CLI
+- [ ] Python runtime (`pip install onlycmd`)
+- [ ] Skill auto-discovery (scan installed packages for onlycmd modules)
+- [ ] `npx onlycmd` developer CLI
 - [ ] Plugin marketplace / registry
 
 ## Design Principles
