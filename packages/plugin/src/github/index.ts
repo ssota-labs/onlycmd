@@ -1,4 +1,5 @@
 import { defineModule } from "../../../core/dist/index.js";
+import { createBranchHandlers } from "./commands/branch.js";
 import { createIssueHandlers } from "./commands/issue.js";
 import { createPrHandlers } from "./commands/pr.js";
 import { createRepoHandlers } from "./commands/repo.js";
@@ -16,6 +17,7 @@ export const github = defineModule({
   name: "gh",
   description: "GitHub operations via virtual CLI - issues, PRs, repos",
   setup: (config?: GitHubConfig) => {
+    const branchHandlers = createBranchHandlers(config ?? {});
     const issueHandlers = createIssueHandlers(config ?? {});
     const prHandlers = createPrHandlers(config ?? {});
     const repoHandlers = createRepoHandlers(config ?? {});
@@ -28,14 +30,19 @@ export const github = defineModule({
           create: issueHandlers.create,
           view: issueHandlers.view,
           comment: issueHandlers.comment,
+          close: issueHandlers.close,
         },
         pr: {
           list: prHandlers.list,
           view: prHandlers.view,
           create: prHandlers.create,
+          merge: prHandlers.merge,
         },
         repo: {
           view: repoHandlers.view,
+        },
+        branch: {
+          create: branchHandlers.create,
         },
       },
       skill,

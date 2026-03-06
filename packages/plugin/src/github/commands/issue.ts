@@ -1,5 +1,5 @@
 import type { RunContext } from "../../../../core/dist/index.js";
-import { githubGet, githubPost, getToken } from "../api.js";
+import { githubGet, githubPatch, githubPost, getToken } from "../api.js";
 
 export function createIssueHandlers(config: { token?: string }) {
   return {
@@ -88,6 +88,26 @@ export function createIssueHandlers(config: { token?: string }) {
         const out = await githubPost<unknown>(
           `/repos/${owner}/${rep}/issues/${num}/comments`,
           { body: String(args.body) },
+          token
+        );
+        return out;
+      },
+    },
+    close: {
+      args: {
+        number: { type: "number" as const, required: true },
+        repo: { type: "string" as const, required: true },
+      },
+      handler: async (args: Record<string, unknown>, context?: RunContext) => {
+        const token = getToken(config, context?.auth);
+        const repo = String(args.repo);
+        const [owner, rep] = repo.split("/");
+        if (!owner || !rep) throw new Error("repo must be owner/repo");
+        const num = Number(args.number);
+        if (!Number.isInteger(num)) throw new Error("number must be an integer");
+        const out = await githubPatch<unknown>(
+          `/repos/${owner}/${rep}/issues/${num}`,
+          { state: "closed" },
           token
         );
         return out;

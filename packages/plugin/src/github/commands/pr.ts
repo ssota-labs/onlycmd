@@ -1,5 +1,5 @@
 import type { RunContext } from "../../../../core/dist/index.js";
-import { githubGet, githubPost, getToken } from "../api.js";
+import { githubGet, githubPost, githubPut, getToken } from "../api.js";
 
 export function createPrHandlers(config: { token?: string }) {
   return {
@@ -65,6 +65,31 @@ export function createPrHandlers(config: { token?: string }) {
         const out = await githubPost<unknown>(
           `/repos/${owner}/${rep}/pulls`,
           body,
+          token
+        );
+        return out;
+      },
+    },
+    merge: {
+      args: {
+        number: { type: "number" as const, required: true },
+        repo: { type: "string" as const, required: true },
+        merge_method: { type: "string" as const, required: false },
+        commit_title: { type: "string" as const, required: false },
+      },
+      handler: async (args: Record<string, unknown>, context?: RunContext) => {
+        const token = getToken(config, context?.auth);
+        const repo = String(args.repo);
+        const [owner, rep] = repo.split("/");
+        if (!owner || !rep) throw new Error("repo must be owner/repo");
+        const num = Number(args.number);
+        if (!Number.isInteger(num)) throw new Error("number must be an integer");
+        const body: Record<string, string> = {};
+        if (args.merge_method != null) body.merge_method = String(args.merge_method);
+        if (args.commit_title != null) body.commit_title = String(args.commit_title);
+        const out = await githubPut<{ merged?: boolean }>(
+          `/repos/${owner}/${rep}/pulls/${num}/merge`,
+          Object.keys(body).length ? body : undefined,
           token
         );
         return out;
