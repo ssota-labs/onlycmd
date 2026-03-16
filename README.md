@@ -324,6 +324,8 @@ Every `runtime.run()` result includes:
 
 - **`module`** — which plugin handled the command (e.g. `"gh"`, `"jira"`)
 - **`command`** — the subcommand path (e.g. `"issue list"`, `"pr view"`)
+- **`result`** — the handler’s return value (absent when the handler streams)
+- **`stream`** — when the handler returns an `AsyncGenerator`, consume with `for await (const value of result.stream)` to get intermediate updates and the final return
 
 Use these to choose which component to render. The dispatcher already knows this when it invokes the handler; onlycmd just surfaces it in the JSON.
 
@@ -352,6 +354,40 @@ Use these to choose which component to render. The dispatcher already knows this
 ```
 
 You can centralize this in a small mapper (e.g. `getComponentForRunResult(module, command, result)`) or a separate UI package; onlycmd does not depend on any of that.
+
+### Streaming handlers (AsyncGenerator)
+
+Handlers may return an `AsyncGenerator` to stream intermediate results (e.g. progress per item). In that case `runtime.run()` returns `ok: true` with **`stream`** set and **`result`** omitted. Consume the stream with `for await` or pass it to an AI SDK tool that supports async iterables.
+
+```typescript
+// Plugin: streaming handler
+commands: {
+  add: {
+    args: { urls: { type: "string", required: true } },
+    handler: async function* (args) {
+      const urls = args.urls.split(",").map((u: string) => u.trim());
+      for (const url of urls) {
+        yield { url, status: "processing" };
+        // ... work ...
+        yield { url, status: "completed" };
+      }
+      return { sources: urls.length };
+    },
+  },
+}
+
+// Consumer: after runtime.run("mymod add --urls ...")
+const runResult = await runtime.run("mymod add --urls https://a.com,https://b.com");
+if (runResult.stream) {
+  for await (const value of runResult.stream) {
+    console.log(value); // e.g. { url: "https://a.com", status: "processing" }
+  }
+} else {
+  console.log(runResult.result);
+}
+```
+
+With the Vercel AI SDK, you can wire a streaming tool by returning the generator from the tool’s `execute` and using `result.stream` when the run result has one.
 
 ## How It Works
 

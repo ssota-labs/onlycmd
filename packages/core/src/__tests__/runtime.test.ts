@@ -90,4 +90,79 @@ describe("createRuntime", () => {
     expect(runtime.getFullSkill("m")).toBe("# Full markdown");
     expect(runtime.getFullSkill("missing")).toBe(null);
   });
+
+  it("run() returns stream when handler is AsyncGenerator", async () => {
+    const mod: VirtualCLIModule = {
+      name: "stream",
+      description: "Streaming module",
+      commands: {
+        tick: {
+          handler: async function* () {
+            yield { step: 1 };
+            yield { step: 2 };
+            return { done: true };
+          },
+        },
+      },
+    };
+    const runtime = createRuntime().use(mod);
+    const runResult = await runtime.run("stream tick");
+    expect(runResult.ok).toBe(true);
+    expect(runResult.module).toBe("stream");
+    expect(runResult.command).toBe("tick");
+    expect(runResult.stream).toBeDefined();
+    expect(runResult.result).toBeUndefined();
+  });
+
+  it("stream from run() yields intermediate values and final return", async () => {
+    const mod: VirtualCLIModule = {
+      name: "stream",
+      description: "Streaming module",
+      commands: {
+        tick: {
+          handler: async function* () {
+            yield { step: 1 };
+            yield { step: 2 };
+            return { done: true };
+          },
+        },
+      },
+    };
+    const runtime = createRuntime().use(mod);
+    const runResult = await runtime.run("stream tick");
+    expect(runResult.ok).toBe(true);
+    expect(runResult.stream).toBeDefined();
+
+    const yielded: unknown[] = [];
+    for await (const value of runResult.stream!) {
+      yielded.push(value);
+    }
+    expect(yielded).toEqual([{ step: 1 }, { step: 2 }]);
+  });
+
+  it("stream return value is available after exhausting generator", async () => {
+    const mod: VirtualCLIModule = {
+      name: "stream",
+      description: "Streaming module",
+      commands: {
+        tick: {
+          handler: async function* () {
+            yield { step: 1 };
+            return { done: true };
+          },
+        },
+      },
+    };
+    const runtime = createRuntime().use(mod);
+    const runResult = await runtime.run("stream tick");
+    const stream = runResult.stream!;
+    let result = await stream.next();
+    const values: unknown[] = [];
+    while (!result.done) {
+      values.push(result.value);
+      result = await stream.next();
+    }
+    expect(values).toEqual([{ step: 1 }]);
+    expect(result.value).toEqual({ done: true });
+  });
 });

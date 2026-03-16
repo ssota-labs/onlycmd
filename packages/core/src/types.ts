@@ -13,11 +13,12 @@ export interface ArgDef {
 
 /**
  * Handler for a leaf command. Receives parsed args and optional run context (e.g. auth).
+ * May return a value/Promise (non-streaming) or an AsyncGenerator (streaming).
  */
 export type CommandHandler<T = Record<string, unknown>> = (
   args: T,
   context?: RunContext
-) => Promise<unknown> | unknown;
+) => Promise<unknown> | unknown | AsyncGenerator<unknown, unknown, void>;
 
 /**
  * Leaf command: has args schema and handler.
@@ -78,12 +79,15 @@ export interface NextAction {
 
 /**
  * Result of runtime.run(). Includes module/command for client-side branching.
+ * When the handler returns an AsyncGenerator, `stream` is set and `result` is omitted.
  */
 export interface RunResult {
   ok: boolean;
   module: string;
   command: string;
   result?: unknown;
+  /** Present when the handler returns an AsyncGenerator; consume with for await. */
+  stream?: AsyncGenerator<unknown, unknown, void>;
   next_actions?: NextAction[];
   error?: string;
   usage?: string;

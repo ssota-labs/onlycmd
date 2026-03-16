@@ -112,7 +112,23 @@ export async function dispatch(
   }
 
   try {
-    const result = await Promise.resolve(leaf.handler(args, context));
+    const raw = leaf.handler(args, context);
+    const isAsyncIterable =
+      typeof raw === "object" &&
+      raw !== null &&
+      typeof (raw as { [Symbol.asyncIterator]?: unknown })[Symbol.asyncIterator] ===
+        "function";
+
+    if (isAsyncIterable) {
+      return {
+        ok: true,
+        module: namespace,
+        command: commandPath,
+        stream: raw as AsyncGenerator<unknown, unknown, void>,
+      };
+    }
+
+    const result = await Promise.resolve(raw);
     const runResult: RunResult = {
       ok: true,
       module: namespace,
