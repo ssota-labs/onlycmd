@@ -21,10 +21,6 @@
     "./x": {
       "types": "./dist/x/index.d.ts",
       "default": "./dist/x/index.js"
-    },
-    "./gws-drive": {
-      "types": "./dist/gws-drive/index.d.ts",
-      "default": "./dist/gws-drive/index.js"
     }
   },
   "files": [
@@ -47,6 +43,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",
+    "@types/node": "^25.5.0",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
     "dotenv": "^16.4.5",

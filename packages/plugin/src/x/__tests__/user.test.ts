@@ -2,8 +2,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createRuntime } from "../../../../core/dist/index.js";
 import { x } from "../index.js";
 
-const BASE = "https://api.x.com/2";
-
 /** Use api adapter for unit tests: fetch stub applies to api.ts; XDK uses node-fetch. */
 const apiCfg = () => ({ adapter: "api" as const });
 

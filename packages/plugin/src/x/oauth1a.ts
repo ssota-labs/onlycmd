@@ -3,7 +3,7 @@
  * Ported from x-cli's auth.py generate_oauth_header.
  */
 
-import { createHmac, randomBytes } from "node:crypto";
+import { createHmac, randomBytes } from "crypto";
 
 export interface OAuthCredentials {
   apiKey: string;

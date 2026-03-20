@@ -3,7 +3,6 @@ import { createRuntime } from "../../../../core/dist/index.js";
 import { x } from "../index.js";
 
 const UPLOAD_BASE = "https://upload.twitter.com/1.1";
-const API_BASE = "https://api.x.com/2";
 
 /** Use api adapter for unit tests: fetch stub applies; media upload uses api layer. */
 const apiCfg = () => ({ adapter: "api" as const });

@@ -1070,15 +1070,6 @@ export async function searchNews(
 
 const UPLOAD_API_BASE = "https://upload.twitter.com/1.1";
 
-/** Allowed Content-Type prefixes for media upload (image/*, video/*, etc.) */
-const ALLOWED_MEDIA_TYPES = ["image/", "video/", "application/octet-stream", "multipart/"];
-
-function isAllowedMediaType(contentType: string | null): boolean {
-  if (!contentType) return true; // Allow if unknown
-  const base = contentType.split(";")[0]!.trim().toLowerCase();
-  return ALLOWED_MEDIA_TYPES.some((t) => base.startsWith(t) || base === t);
-}
-
 function isRejectedMediaType(contentType: string | null): boolean {
   if (!contentType) return false;
   const base = contentType.split(";")[0]!.trim().toLowerCase();

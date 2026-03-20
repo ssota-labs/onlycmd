@@ -5,8 +5,6 @@
 
 import { vi } from "vitest";
 
-const BASE = "https://api.x.com/2";
-
 export type MockFetchHandler = (
   url: string,
   init?: { method?: string; body?: string; headers?: Record<string, string> }

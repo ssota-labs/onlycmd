@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { generateOAuthHeader } from "../oauth1a.js";
 
 // Mock crypto to get deterministic results for testing
