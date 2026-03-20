@@ -5,6 +5,8 @@ export default defineConfig({
     index: "src/index.ts",
     "github/index": "src/github/index.ts",
     "jira/index": "src/jira/index.ts",
+    "x/index": "src/x/index.ts",
+    "gws-drive/index": "src/gws-drive/index.ts",
   },
   format: ["esm", "cjs"],
   dts: true,

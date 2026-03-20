@@ -174,6 +174,9 @@ importers:
 
   packages/plugin:
     dependencies:
+      '@xdevplatform/xdk':
+        specifier: ^0.5.0
+        version: 0.5.0(node-fetch@3.3.2)
       onlycmd:
         specifier: workspace:*
         version: link:../core
@@ -2195,6 +2198,15 @@ packages:
 
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
+
+  '@xdevplatform/xdk@0.5.0':
+    resolution: {integrity: sha512-Ye3yAmJOhal7wqvq6z8iJgSxq4+ytQmPFMMkyg/cPcdoeebqHZBdwTmc3T78kTbUwQy8NoCFRjgTrC+n7lmPnA==}
+    engines: {node: '>=16.14'}
+    peerDependencies:
+      node-fetch: ^3.3.0
+    peerDependenciesMeta:
+      node-fetch:
+        optional: true
 
   accepts@2.0.0:
     resolution: {integrity: sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng==}
@@ -7010,6 +7022,10 @@ snapshots:
       '@vitest/pretty-format': 3.2.4
       loupe: 3.2.1
       tinyrainbow: 2.0.0
+
+  '@xdevplatform/xdk@0.5.0(node-fetch@3.3.2)':
+    optionalDependencies:
+      node-fetch: 3.3.2
 
   accepts@2.0.0:
     dependencies:
